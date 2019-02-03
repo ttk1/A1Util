@@ -3,20 +3,21 @@ package net.ttk1.a1util;
 import java.util.regex.Pattern;
 
 public class A1Util {
-    private static Pattern p = Pattern.compile("^[A-Z]+$");
-    public static String increment(String a1) {
+    private static final Pattern a1ColNumPattern = Pattern.compile("^[A-Z]+$");
+
+    public static String increment(String a1ColNum) {
         StringBuilder ret = new StringBuilder();
         boolean carry = true;
-        for (int i = a1.length() -1; i >= 0; i--) {
+        for (int i = a1ColNum.length() -1; i >= 0; i--) {
             if (carry) {
-                if (a1.charAt(i) == 'Z') {
+                if (a1ColNum.charAt(i) == 'Z') {
                     ret.insert(0, 'A');
                 } else {
-                    ret.insert(0, nextChar(a1.charAt(i)));
+                    ret.insert(0, nextChar(a1ColNum.charAt(i)));
                     carry = false;
                 }
             } else {
-                ret.insert(0, a1.charAt(i));
+                ret.insert(0, a1ColNum.charAt(i));
             }
         }
         if (carry) {
@@ -33,34 +34,27 @@ public class A1Util {
         }
     }
 
-    public static String toA1(int r1c1) throws Exception {
-        if (r1c1 <= 0) {
+    public static String toA1ColNum(int r1c1ColNum) throws Exception {
+        if (r1c1ColNum <= 0) {
             throw  new Exception();
         }
 
         StringBuilder ret = new StringBuilder();
-        while (r1c1 > 0) {
-            int rem = r1c1 % 26;
-            if (rem == 0) {
-                ret.insert(0, 'Z');
-                r1c1 -= 26;
-            } else {
-                ret.insert(0, (char) ('A' + rem - 1));
-                r1c1 -= rem;
-            }
-            r1c1 /= 26;
+        for (; r1c1ColNum > 0; r1c1ColNum = (r1c1ColNum - 1) / 26) {
+            ret.append((char) ('A' + (r1c1ColNum - 1) % 26));
+            ;
         }
-        return ret.toString();
+        return ret.reverse().toString();
     }
 
-    public static int fromA1(String a1) throws Exception {
-        if (!p.matcher(a1).find()) {
+    public static int fromA1ColNum(String a1ColNum) throws Exception {
+        if (!a1ColNumPattern.matcher(a1ColNum).find()) {
             throw new Exception();
         }
 
         int ret = 0;
-        for (int i = 0; i < a1.length(); i++) {
-            ret += (a1.charAt(a1.length() - 1 - i) - 'A' + 1) * Math.pow(26, i);
+        for (int i = 0; i < a1ColNum.length(); i++) {
+            ret = ret * 26 + (a1ColNum.charAt(i) - 'A' + 1);
         }
         return ret;
     }
@@ -69,10 +63,10 @@ public class A1Util {
     public static void main(String[] args) throws Exception {
         String a1 = "A";
         for (int i = 1; i < 10000; i++) {
-            if (!a1.equals(toA1(i))) {
+            if (!a1.equals(toA1ColNum(i))) {
                 throw new Exception();
             }
-            if (i != fromA1(a1)) {
+            if (i != fromA1ColNum(a1)) {
                 throw new Exception();
             }
             a1 = increment(a1);
